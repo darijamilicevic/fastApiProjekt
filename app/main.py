@@ -1,10 +1,13 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 
-
+# Postavke baze podataka
 DB_HOST = os.environ.get("DB_HOST", "localhost")
 DB_USER = os.environ.get("DB_USER", "root")
 DB_PASSWORD = os.environ.get("DB_PASSWORD", "lozinka")
@@ -12,13 +15,17 @@ DB_NAME = os.environ.get("DB_NAME", "todo_baza")
 
 DATABASE_URL = f"mysql+mysqlconnector://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:3306/{DB_NAME}"
 
-
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
-
 app = FastAPI()
+
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+templates = Jinja2Templates(directory="frontend")
 
 
 class Zadatak(Base):
@@ -39,9 +46,11 @@ class ZadatakPrikaz(BaseModel):
     class Config:
         orm_mode = True
 
+
 @app.on_event("startup")
 def inicijaliziraj_bazu():
     Base.metadata.create_all(bind=engine)
+
 
 def dobavi_bazu():
     db = SessionLocal()
@@ -51,11 +60,12 @@ def dobavi_bazu():
         db.close()
 
 
-@app.get("/")
-def read_root():
-    return {"poruka": "Dobrodošli u to-do aplikaciju!"}
+@app.get("/", response_class=HTMLResponse)
+def prikazi_frontend(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-@app.post("/zadaci", response_model=ZadatakPrikaz)
+
+@app.post("/api/zadaci", response_model=ZadatakPrikaz)
 def dodaj_zadatak(zadatak: ZadatakUnos, db=Depends(dobavi_bazu)):
     novi_zadatak = Zadatak(naslov=zadatak.naslov)
     db.add(novi_zadatak)
@@ -64,28 +74,28 @@ def dodaj_zadatak(zadatak: ZadatakUnos, db=Depends(dobavi_bazu)):
     return novi_zadatak
 
 
-@app.get("/zadaci", response_model=list[ZadatakPrikaz])
+@app.get("/api/zadaci", response_model=list[ZadatakPrikaz])
 def svi_zadaci(db=Depends(dobavi_bazu)):
     zadaci = db.query(Zadatak).all()
     return zadaci
 
 
-@app.put("/zadaci/{zadatak_id}", response_model=ZadatakPrikaz)
-def azuriraj_zadatak(zadatak_id: int, podaci: ZadatakUnos, db=Depends(dobavi_bazu)):
-    zadatak = db.query(Zadatak).filter(Zadatak.id == zadatak_id).first()
-    if not zadatak:
+@app.put("/api/zadaci/{zadatak_id}", response_model=ZadatakPrikaz)
+def azuriraj_zadatak(zadatak_id: int, zadatak: ZadatakUnos, db=Depends(dobavi_bazu)):
+    db_zadatak = db.query(Zadatak).filter(Zadatak.id == zadatak_id).first()
+    if not db_zadatak:
         raise HTTPException(status_code=404, detail="Zadatak nije pronađen")
-    zadatak.naslov = podaci.naslov
+    db_zadatak.naslov = zadatak.naslov
     db.commit()
-    db.refresh(zadatak)
-    return zadatak
+    db.refresh(db_zadatak)
+    return db_zadatak
 
 
-@app.delete("/zadaci/{zadatak_id}")
+@app.delete("/api/zadaci/{zadatak_id}")
 def izbrisi_zadatak(zadatak_id: int, db=Depends(dobavi_bazu)):
-    zadatak = db.query(Zadatak).filter(Zadatak.id == zadatak_id).first()
-    if not zadatak:
+    db_zadatak = db.query(Zadatak).filter(Zadatak.id == zadatak_id).first()
+    if not db_zadatak:
         raise HTTPException(status_code=404, detail="Zadatak nije pronađen")
-    db.delete(zadatak)
+    db.delete(db_zadatak)
     db.commit()
     return {"poruka": "Zadatak uspješno obrisan"}
