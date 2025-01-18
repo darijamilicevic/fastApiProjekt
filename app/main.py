@@ -51,7 +51,9 @@ def dobavi_bazu():
         db.close()
 
 
-
+@app.get("/")
+def read_root():
+    return {"poruka": "Dobrodošli u to-do aplikaciju!"}
 
 @app.post("/zadaci", response_model=ZadatakPrikaz)
 def dodaj_zadatak(zadatak: ZadatakUnos, db=Depends(dobavi_bazu)):
