@@ -90,6 +90,8 @@ def azuriraj_zadatak(zadatak_id: int, zadatak: ZadatakUnos, db=Depends(dobavi_ba
     db.refresh(db_zadatak)
     return db_zadatak
 
+#crfrfrfr
+
 
 @app.delete("/api/zadaci/{zadatak_id}")
 def izbrisi_zadatak(zadatak_id: int, db=Depends(dobavi_bazu)):
