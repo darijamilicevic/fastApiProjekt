@@ -16,6 +16,7 @@ function prikaziZadatke(zadaci) {
         lista.appendChild(li);
     });
 }
+
 async function dodajZadatak(event) {
     event.preventDefault();
     const naslov = document.getElementById("naslov-zadatka").value;

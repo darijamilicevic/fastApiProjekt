@@ -92,7 +92,6 @@ def azuriraj_zadatak(zadatak_id: int, zadatak: ZadatakUnos, db=Depends(dobavi_ba
 
 #crfrfrfr
 
-
 @app.delete("/api/zadaci/{zadatak_id}")
 def izbrisi_zadatak(zadatak_id: int, db=Depends(dobavi_bazu)):
     db_zadatak = db.query(Zadatak).filter(Zadatak.id == zadatak_id).first()
