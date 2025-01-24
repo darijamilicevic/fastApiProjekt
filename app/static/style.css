@@ -1,27 +1,96 @@
 body {
+    margin: 0;
     font-family: Arial, sans-serif;
-    margin: 20px;
-}
-
-h1 {
+    background: #f5f5f5;
     color: #333;
-}
-
-form {
-    margin-bottom: 20px;
-}
-
-ul {
-    list-style-type: none;
+  }
+  
+  .container {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+  }
+  
+  h1,
+  h2 {
+    margin-top: 0;
+    color: #444;
+  }
+  
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 16px;
+    align-items: center;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+  }
+  
+  .form-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  input[type="text"],
+  textarea {
+    padding: 8px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  textarea {
+    resize: vertical;
+  }
+  
+  button {
+    cursor: pointer;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  .btn-primary {
+    background-color: #007bff;
+    color: #fff;
+  }
+  
+  .btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+  }
+  
+  /* Dodaj gumb za brisanje */
+  .btn-delete {
+    background-color: #dc3545; /* crvena */
+    color: #fff;
+    margin-left: 8px;
+  }
+  
+  hr {
+    margin: 30px 0;
+    border: 0;
+    border-top: 1px solid #ddd;
+  }
+  
+  #lista-zadataka {
+    list-style: none;
     padding: 0;
-}
-
-li {
-    margin: 10px 0;
-    border-bottom: 1px solid #ccc;
-    padding: 5px 0;
-}
-
-button {
-    margin-left: 10px;
-}
+    margin: 20px 0;
+  }
+  
+  #lista-zadataka li {
+    background: #fafafa;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 3px;
+    border-left: 4px solid #007bff;
+  }
+  

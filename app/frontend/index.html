@@ -6,47 +6,51 @@
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-  <h1>Dodaj Zadatak</h1>
+  <div class="container">
+    <h1>Dodaj Zadatak</h1>
+    <form id="forma-zadatak-komplet" class="form-grid">
 
-  <form id="forma-zadatak-komplet">
-    <div>
-      <label for="naslov">Naslov zadatka:</label>
-      <input type="text" id="naslov" required />
-    </div>
+      <div class="form-group">
+        <label for="naslov">Naslov:</label>
+        <input type="text" id="naslov" required />
+      </div>
 
-    <div>
-      <label for="select-kategorija">Kategorija:</label>
-      <select id="select-kategorija" required>
-        <option value="">-- Odaberi kategoriju --</option>
-      </select>
-    </div>
+      <div class="form-group">
+        <label for="ime">Ime korisnika:</label>
+        <input type="text" id="ime" required />
+      </div>
 
-    <div>
-      <label for="select-korisnik">Korisnik:</label>
-      <select id="select-korisnik" required>
-        <option value="">-- Odaberi korisnika --</option>
-      </select>
-    </div>
+      <div class="form-group">
+        <label for="prezime">Prezime korisnika:</label>
+        <input type="text" id="prezime" required />
+      </div>
 
-    <div>
-      <label for="select-tagovi">Tagovi:</label>
-      <select id="select-tagovi" multiple>
-      </select>
-    </div>
+      <div class="form-group">
+        <label for="kategorija">Kategorija:</label>
+        <input type="text" id="kategorija" placeholder="npr. 'Posao', 'Privatno'..." />
+      </div>
 
-    <div>
-      <label for="komentar">Komentar:</label>
-      <textarea id="komentar" placeholder="Unesi komentar"></textarea>
-    </div>
+      <div class="form-group">
+        <label for="tagovi">Tag:</label>
+        <input type="text" id="tagovi" placeholder="npr. 'hitno, dom, kratko'..." />
+      </div>
 
-    <button type="submit">Dodaj Zadatak</button>
-  </form>
+      <div class="form-group">
+        <label for="komentar">Komentar:</label>
+        <textarea id="komentar" rows="3" placeholder="Unesite komentar"></textarea>
+      </div>
 
-  <hr />
+      <div class="form-group">
+        <button type="submit" class="btn-primary">Dodaj Zadatak</button>
+      </div>
+    </form>
 
-  <h2>Pregled Zadataka</h2>
-  <button id="btn-refresh-zadaci">Osvježi Zadatke</button>
-  <ul id="lista-zadataka"></ul>
+    <hr />
+
+    <h2>Pregled Zadataka</h2>
+    <button id="btn-refresh-zadaci" class="btn-secondary">Osvježi Zadatke</button>
+    <ul id="lista-zadataka"></ul>
+  </div>
 
   <script src="/static/script.js"></script>
 </body>
