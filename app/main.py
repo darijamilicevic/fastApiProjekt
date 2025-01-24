@@ -10,8 +10,6 @@ import os
 import redis
 import json
 
-from models import Base, Zadatak, Kategorija, Korisnik, Tag, Komentar
-
 DB_HOST = os.environ.get("DB_HOST", "localhost")
 DB_USER = os.environ.get("DB_USER", "root")
 DB_PASSWORD = os.environ.get("DB_PASSWORD", "lozinka")
@@ -24,11 +22,68 @@ SessionLocal = sessionmaker(bind=engine)
 
 REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.environ.get("REDIS_PORT", 6379))
-redisKes = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+redisKes = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True) 
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="frontend")
+
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Table
+from sqlalchemy.orm import relationship, declarative_base
+
+Base = declarative_base()
+
+zadaci_tagovi = Table(
+    "zadaci_tagovi",
+    Base.metadata,
+    Column("zadatak_id", Integer, ForeignKey("zadaci.id"), primary_key=True),
+    Column("tag_id", Integer, ForeignKey("tag.id"), primary_key=True),
+)
+
+class Zadatak(Base):
+    __tablename__ = "zadaci"
+    id = Column(Integer, primary_key=True, index=True)
+    naslov = Column(String(100), nullable=False)
+    obavljeno = Column(Boolean, default=False)
+    
+
+    kategorija_id = Column(Integer, ForeignKey("kategorija.id"))
+    korisnik_id = Column(Integer, ForeignKey("korisnik.id"))
+
+    kategorija = relationship("Kategorija", back_populates="zadaci")
+    korisnik = relationship("Korisnik", back_populates="zadaci")
+    tagovi = relationship("Tag", secondary=zadaci_tagovi, back_populates="zadaci")
+    komentari = relationship("Komentar", back_populates="zadatak")
+
+class Kategorija(Base):
+    __tablename__ = "kategorija"
+    id = Column(Integer, primary_key=True, index=True)
+    naziv = Column(String(50), nullable=False)
+
+    zadaci = relationship("Zadatak", back_populates="kategorija")
+
+class Korisnik(Base):
+    __tablename__ = "korisnik"
+    id = Column(Integer, primary_key=True, index=True)
+    ime = Column(String(50), nullable=False)
+    prezime = Column(String(50), nullable=False)
+
+    zadaci = relationship("Zadatak", back_populates="korisnik")
+
+class Tag(Base):
+    __tablename__ = "tag"
+    id = Column(Integer, primary_key=True, index=True)
+    naziv = Column(String(50), nullable=False)
+
+    zadaci = relationship("Zadatak", secondary=zadaci_tagovi, back_populates="tagovi")
+
+class Komentar(Base):
+    __tablename__ = "komentar"
+    id = Column(Integer, primary_key=True, index=True)
+    sadrzaj = Column(String(255), nullable=False)
+
+    zadatak_id = Column(Integer, ForeignKey("zadaci.id"))
+    zadatak = relationship("Zadatak", back_populates="komentari")
 
 @app.on_event("startup")
 def inicijaliziraj_bazu():
