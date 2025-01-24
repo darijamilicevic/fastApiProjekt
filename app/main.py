@@ -10,10 +10,10 @@ import os
 import redis
 import json
 
-DB_HOST = os.environ.get("DB_HOST", "localhost")
+DB_HOST = os.environ.get("DB_HOST", "mysql")
 DB_USER = os.environ.get("DB_USER", "root")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "lozinka")
-DB_NAME = os.environ.get("DB_NAME", "todo_baza")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "my-secret-pw")
+DB_NAME = os.environ.get("DB_NAME", "mydatabase")
 
 DATABASE_URL = f"mysql+mysqlconnector://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:3306/{DB_NAME}"
 engine = create_engine(DATABASE_URL)
@@ -103,10 +103,11 @@ class ZadatakKompletanUnos(BaseModel):
     tagovi: List[str] = []
     komentar: Optional[str] = None
 
+
 @app.get("/api/zadaci")
 def svi_zadaci(db=Depends(dobavi_bazu)):
     cache_key = "svi_zadaci"
-    data = redisKes.get(cache_key)  # dohvati iz cache-a
+    data = redisKes.get(cache_key)
     if data:
         return json.loads(data)
 
@@ -119,17 +120,18 @@ def svi_zadaci(db=Depends(dobavi_bazu)):
             "kategorija": z.kategorija.naziv if z.kategorija else None,
             "korisnik": f"{z.korisnik.ime} {z.korisnik.prezime}" if z.korisnik else None,
             "tagovi": [tag.naziv for tag in z.tagovi],
-            "komentari": [kom.sadrzaj for kom in z.komentari]
+            "komentari": [kom.sadrzaj for kom in z.komentari],
+            "obavljeno": z.obavljeno
         })
 
-    # Spremi u cache
+    # Cache
     redisKes.set(cache_key, json.dumps(output))
     return output
 
 
 @app.post("/api/zadaci_komplet")
 def kreiraj_zadatak_komplet(podaci: ZadatakKompletanUnos, db=Depends(dobavi_bazu)):
-
+ 
     korisnik = (
         db.query(Korisnik)
         .filter(Korisnik.ime == podaci.ime, Korisnik.prezime == podaci.prezime)
@@ -141,8 +143,76 @@ def kreiraj_zadatak_komplet(podaci: ZadatakKompletanUnos, db=Depends(dobavi_bazu
         db.commit()
         db.refresh(korisnik)
 
-
+  
     kat_obj = None
     if podaci.kategorija:
         kat_obj = db.query(Kategorija).filter(Kategorija.naziv == podaci.kategorija).first()
-     
+        if not kat_obj:
+            kat_obj = Kategorija(naziv=podaci.kategorija)
+            db.add(kat_obj)
+            db.commit()
+            db.refresh(kat_obj)
+
+
+    novi_zadatak = Zadatak(
+        naslov=podaci.naslov,
+        kategorija_id=kat_obj.id if kat_obj else None,
+        korisnik_id=korisnik.id
+    )
+    db.add(novi_zadatak)
+    db.commit()
+    db.refresh(novi_zadatak)
+
+  
+    for tag_naziv in podaci.tagovi:
+        t = tag_naziv.strip()
+        if not t:
+            continue
+        tag_obj = db.query(Tag).filter(Tag.naziv == t).first()
+        if not tag_obj:
+            tag_obj = Tag(naziv=t)
+            db.add(tag_obj)
+            db.commit()
+            db.refresh(tag_obj)
+        novi_zadatak.tagovi.append(tag_obj)
+
+   
+    if podaci.komentar:
+        kom = Komentar(sadrzaj=podaci.komentar, zadatak_id=novi_zadatak.id)
+        db.add(kom)
+
+    db.commit()
+    db.refresh(novi_zadatak)
+
+    # Očisti cache
+    redisKes.delete("svi_zadaci")
+
+    return {
+        "id": novi_zadatak.id,
+        "naslov": novi_zadatak.naslov,
+        "kategorija": kat_obj.naziv if kat_obj else None,
+        "korisnik": f"{korisnik.ime} {korisnik.prezime}",
+        "tagovi": [tg.naziv for tg in novi_zadatak.tagovi],
+        "komentari": [kom.sadrzaj for kom in novi_zadatak.komentari],
+        "obavljeno": novi_zadatak.obavljeno
+    }
+
+
+@app.delete("/api/zadaci/{zadatak_id}")
+def obrisi_zadatak(zadatak_id: int, db=Depends(dobavi_bazu)):
+    zadatak = db.query(Zadatak).filter(Zadatak.id == zadatak_id).first()
+    if not zadatak:
+        raise HTTPException(status_code=404, detail="Zadatak ne postoji")
+
+   
+    for kom in zadatak.komentari:
+        db.delete(kom)
+
+    zadatak.tagovi.clear()
+
+    db.delete(zadatak)
+    db.commit()
+
+    redisKes.delete("svi_zadaci")
+
+    return {"message": "Zadatak obrisan"}

@@ -6,11 +6,8 @@ body {
   }
   
   .container {
-    max-width: 700px;
     margin: 40px auto;
     padding: 20px;
-    background: #fff;
-    border-radius: 5px;
   }
   
   h1,
@@ -18,13 +15,7 @@ body {
     margin-top: 0;
     color: #444;
   }
-  
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 16px;
-    align-items: center;
-  }
+
   
   .form-group {
     display: flex;
@@ -59,12 +50,12 @@ body {
   
   .btn-primary {
     background-color: #007bff;
-    color: #fff;
+   
   }
   
   .btn-secondary {
     background-color: #6c757d;
-    color: #fff;
+
   }
   
   /* Dodaj gumb za brisanje */
