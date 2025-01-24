@@ -1,21 +1,53 @@
 <!DOCTYPE html>
 <html lang="hr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-Do Lista</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8" />
+  <title>To-Do App</title>
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-    <h1>To-Do Listaa</h1>
+  <h1>Dodaj Zadatak</h1>
 
-    <form id="forma-zadatak">
-        <input type="text" id="naslov-zadatka" placeholder="Unesite novi zadatak" required>
-        <button type="submit">Dodaj</button>
-    </form>
+  <form id="forma-zadatak-komplet">
+    <div>
+      <label for="naslov">Naslov zadatka:</label>
+      <input type="text" id="naslov" required />
+    </div>
 
-    <ul id="lista-zadataka"></ul>
+    <div>
+      <label for="select-kategorija">Kategorija:</label>
+      <select id="select-kategorija" required>
+        <option value="">-- Odaberi kategoriju --</option>
+      </select>
+    </div>
 
-    <script src="/static/script.js"></script>
+    <div>
+      <label for="select-korisnik">Korisnik:</label>
+      <select id="select-korisnik" required>
+        <option value="">-- Odaberi korisnika --</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="select-tagovi">Tagovi:</label>
+      <select id="select-tagovi" multiple>
+      </select>
+    </div>
+
+    <div>
+      <label for="komentar">Komentar:</label>
+      <textarea id="komentar" placeholder="Unesi komentar"></textarea>
+    </div>
+
+    <button type="submit">Dodaj Zadatak</button>
+  </form>
+
+  <hr />
+
+  <h2>Pregled Zadataka</h2>
+  <button id="btn-refresh-zadaci">Osvježi Zadatke</button>
+  <ul id="lista-zadataka"></ul>
+
+  <script src="/static/script.js"></script>
 </body>
 </html>

@@ -15,6 +15,7 @@ services:
       - DB_PASSWORD=my-secret-pw
       - DB_NAME=mydatabase
       - REDIS_HOST=redis
+      - REDIS_PORT=6379
 
   mysql:
     image: mysql:8.0
